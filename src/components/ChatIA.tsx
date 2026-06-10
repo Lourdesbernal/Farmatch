@@ -41,11 +41,17 @@ export default function ChatIA({ rol, contexto }: Props) {
     const [mensajes, setMensajes] = useState<Mensaje[]>([{ rol: "assistant", contenido: mensajeInicial[rol] }]);
     const [input, setInput] = useState("");
     const [cargando, setCargando] = useState(false);
+    const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Detectar modo oscuro del DOM
-
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setDark(document.documentElement.classList.contains("dark"));
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [mensajes, cargando]);
     useEffect(() => { if (abierto) setTimeout(() => inputRef.current?.focus(), 100); }, [abierto]);
@@ -86,16 +92,18 @@ export default function ChatIA({ rol, contexto }: Props) {
         <>
             <button
                 onClick={() => setAbierto((v) => !v)}
-                className={`fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200
-                    ${abierto ? "bg-slate-700" : "bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 hover:scale-110 border border-slate-200 dark:border-slate-600"}`}
+                style={{ backgroundColor: abierto ? "#334155" : dark ? "#1e293b" : "#f1f5f9", borderColor: dark ? "#475569" : "#e2e8f0" }}
+                className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110 border"
                 aria-label="Abrir asistente IA"
             >
                 {abierto ? <X size={22} className="text-white" /> : <FarmyIcon size={36} />}
             </button>
 
             {abierto && (
-                <div className="fixed bottom-24 right-5 z-50 w-80 sm:w-96 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 flex flex-col overflow-hidden" style={{ maxHeight: "520px" }}>
-                    {/* Header */}
+                <div
+                    style={{ backgroundColor: dark ? "#1e293b" : "#ffffff", borderColor: dark ? "#334155" : "#f1f5f9", maxHeight: "520px" }}
+                    className="fixed bottom-24 right-5 z-50 w-80 sm:w-96 rounded-2xl shadow-2xl border flex flex-col overflow-hidden"
+                >
                     <div className="bg-blue-600 px-4 py-3 flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                             <FarmyIcon size={24} />
@@ -106,18 +114,17 @@ export default function ChatIA({ rol, contexto }: Props) {
                         </div>
                     </div>
 
-                    {/* Mensajes */}
-                    <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-slate-50 dark:bg-slate-900" style={{ minHeight: "300px" }}>
+                    <div style={{ backgroundColor: dark ? "#0f172a" : "#f8fafc", minHeight: "300px" }} className="flex-1 overflow-y-auto p-3 space-y-3">
                         {mensajes.map((m, i) => (
                             <div key={i} className={`flex gap-2 ${m.rol === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                                <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${m.rol === "user" ? "bg-blue-600" : "bg-slate-200 dark:bg-slate-700"}`}>
+                                <div style={{ backgroundColor: m.rol === "user" ? "#2563eb" : dark ? "#334155" : "#e2e8f0" }} className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                                     {m.rol === "user" ? <User size={13} className="text-white" /> : <FarmyIcon size={18} />}
                                 </div>
-                                <div className={`max-w-[78%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap
-                                    ${m.rol === "user"
-                                        ? "bg-blue-600 text-white rounded-tr-sm"
-                                        : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-700 shadow-sm rounded-tl-sm"
-                                    }`}>
+                                <div style={{
+                                    backgroundColor: m.rol === "user" ? "#2563eb" : dark ? "#1e293b" : "#ffffff",
+                                    color: m.rol === "user" ? "#ffffff" : dark ? "#e2e8f0" : "#334155",
+                                    borderColor: dark ? "#334155" : "#f1f5f9",
+                                }} className="max-w-[78%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap border shadow-sm">
                                     {m.contenido}
                                 </div>
                             </div>
@@ -125,10 +132,10 @@ export default function ChatIA({ rol, contexto }: Props) {
 
                         {cargando && (
                             <div className="flex gap-2">
-                                <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <div style={{ backgroundColor: dark ? "#334155" : "#e2e8f0" }} className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <FarmyIcon size={18} />
                                 </div>
-                                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-2xl rounded-tl-sm px-3 py-2">
+                                <div style={{ backgroundColor: dark ? "#1e293b" : "#ffffff", borderColor: dark ? "#334155" : "#f1f5f9" }} className="border shadow-sm rounded-2xl px-3 py-2">
                                     <div className="flex gap-1 items-center h-5">
                                         {[0, 1, 2].map((i) => (
                                             <div key={i} className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
@@ -140,8 +147,7 @@ export default function ChatIA({ rol, contexto }: Props) {
                         <div ref={bottomRef} />
                     </div>
 
-                    {/* Input */}
-                    <div className="p-3 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
+                    <div style={{ backgroundColor: dark ? "#1e293b" : "#ffffff", borderColor: dark ? "#334155" : "#f1f5f9" }} className="p-3 border-t">
                         <div className="flex gap-2 items-center">
                             <input
                                 ref={inputRef}
@@ -151,7 +157,8 @@ export default function ChatIA({ rol, contexto }: Props) {
                                 onKeyDown={handleKey}
                                 placeholder={placeholder[rol]}
                                 disabled={cargando}
-                                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400"
+                                style={{ backgroundColor: dark ? "#0f172a" : "#f8fafc", borderColor: dark ? "#475569" : "#e2e8f0", color: dark ? "#e2e8f0" : "#1e293b" }}
+                                className="flex-1 px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                             />
                             <button
                                 onClick={enviar}
@@ -161,7 +168,7 @@ export default function ChatIA({ rol, contexto }: Props) {
                                 {cargando ? <Loader size={15} className="text-white animate-spin" /> : <Send size={15} className="text-white" />}
                             </button>
                         </div>
-                        <p className="text-xs text-slate-300 dark:text-slate-500 text-center mt-2">Solo informativo · No reemplaza consulta médica</p>
+                        <p style={{ color: dark ? "#475569" : "#cbd5e1" }} className="text-xs text-center mt-2">Solo informativo · No reemplaza consulta médica</p>
                     </div>
                 </div>
             )}
