@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, User, Loader } from "lucide-react";
+import { X, Send, User, Loader } from "lucide-react";
 import { FarmyIcon } from "./FarmyIcon";
 
 type Rol = "paciente" | "medico" | "farmacia";
