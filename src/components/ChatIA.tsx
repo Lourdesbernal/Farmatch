@@ -45,14 +45,7 @@ export default function ChatIA({ rol, contexto }: Props) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Detectar modo oscuro del DOM
-    const [dark, setDark] = useState(false);
-    useEffect(() => {
-        const check = () => setDark(document.documentElement.classList.contains("dark"));
-        check();
-        const observer = new MutationObserver(check);
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-        return () => observer.disconnect();
-    }, []);
+
 
     useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [mensajes, cargando]);
     useEffect(() => { if (abierto) setTimeout(() => inputRef.current?.focus(), 100); }, [abierto]);
