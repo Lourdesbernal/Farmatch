@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";
-import { ArrowLeft, ChevronDown, FileText, User, Pill, QrCode, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, ChevronDown, FileText, Pill, QrCode, CheckCircle2, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface Medico {
@@ -161,7 +161,7 @@ export default function MisRecetas() {
                         {activas.length > 0 && (
                             <section className="space-y-3">
                                 <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-1">Activas</h2>
-                                {activas.map((receta, i) => (
+                                {activas.map((receta,) => (
                                     <RecetaCard
                                         key={receta.id_receta}
                                         receta={receta}
@@ -225,7 +225,6 @@ function RecetaCard({
     onToggle: () => void;
     onToggleQr: (e: React.MouseEvent) => void;
 }) {
-    const entregados = items.filter(i => i.entregado).length;
     const pendientes = items.filter(i => !i.entregado).length;
     const fechaVencimiento = new Date(receta.fecha_emision);
     fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);
