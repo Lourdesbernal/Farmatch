@@ -142,7 +142,7 @@ export default function DashboardPaciente() {
                 )}
 
                 {/* Estadísticas */}
-                <div className="mb-8 grid gap-4 md:grid-cols-4">
+                <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
                     <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
                         <p className="text-sm text-slate-500">Recetas activas</p>
                         <p className="mt-2 text-4xl font-bold text-blue-600">{recetas.length}</p>
