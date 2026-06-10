@@ -134,7 +134,7 @@ export default function ChatIA({ rol, contexto }: Props) {
             <button
                 onClick={() => setAbierto((v) => !v)}
                 className={`fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200
-                    ${abierto ? "bg-slate-700" : "bg-blue-600 hover:bg-blue-700 hover:scale-110"}`}
+    ${abierto ? "bg-slate-700" : "bg-white hover:bg-slate-50 hover:scale-110 border border-slate-200"}`}
                 aria-label="Abrir asistente IA"
             >
                 {abierto ? <X size={22} className="text-white" /> : <FarmyIcon size={28} />}
