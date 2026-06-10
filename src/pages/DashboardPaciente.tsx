@@ -9,8 +9,8 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import ChatIA from "../components/ChatIA";
-import { Search, FileText, PackageCheck, LogOut } from "lucide-react";
-
+import { Search, FileText, PackageCheck, LogOut, Sun, Moon } from "lucide-react";
+import { useDarkMode } from "../hooks/useDarkMode";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -31,6 +31,7 @@ function calcularDistanciaKm(lat1: number, lon1: number, lat2: number, lon2: num
 
 export default function DashboardPaciente() {
     const navigate = useNavigate();
+    const { dark, toggle } = useDarkMode();
     const [farmacias, setFarmacias] = useState<any[]>([]);
     const [farmaciasCercanas, setFarmaciasCercanas] = useState<any[]>([]);
     const [recetas, setRecetas] = useState<any[]>([]);
@@ -66,16 +67,12 @@ export default function DashboardPaciente() {
         async function cargarDatos() {
             const { data: farmaciasData } = await supabase.from("farmacias").select("*");
             if (farmaciasData) setFarmacias(farmaciasData);
-
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
-
             const { data: perfil } = await supabase.from("perfiles").select("*").eq("id", user.id).single();
             if (perfil) setNombre(perfil.nombre);
-
             const { data: paciente } = await supabase.from("pacientes").select("*").eq("email", user.email).single();
             if (!paciente) return;
-
             const { data: recetasData } = await supabase.from("recetas").select("*")
                 .eq("id_paciente", paciente.id_paciente).eq("estado", "activa");
             if (recetasData) {
@@ -85,8 +82,6 @@ export default function DashboardPaciente() {
                     .in("id_receta", idsRecetas).eq("entregado", false);
                 setMedicamentosPendientes(itemsPaciente?.length || 0);
             }
-
-            // Reservas activas (pendiente + preparando + lista)
             const { data: reservasData } = await supabase.from("reservas").select("*")
                 .eq("id_paciente", paciente.id_paciente)
                 .in("estado", ["pendiente", "preparando", "lista"]);
@@ -106,15 +101,19 @@ export default function DashboardPaciente() {
     const mapCenter = ubicacion ?? { lat: -34.6037, lng: -58.3816 };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC]">
-            {/* Header cohesivo con farmacia */}
-            <header className="bg-white border-b-2 border-blue-600 shadow-sm">
+        <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900">
+            <header className="bg-white dark:bg-slate-800 border-b-2 border-blue-600 shadow-sm">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-3">
                     <FarmatchLogoHorizontal height={48} />
-                    <div className="text-right">
-                        <p className="font-semibold text-slate-800">{nombre}</p>
-                        <p className="text-sm text-slate-400">paciente</p>
-                        <button onClick={cerrarSesion} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-red-500 transition px-2 py-1 rounded-lg hover:bg-red-50">
+                    <div className="flex items-center gap-3">
+                        <button onClick={toggle} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                            {dark ? <Sun size={18} /> : <Moon size={18} />}
+                        </button>
+                        <div className="text-right">
+                            <p className="font-semibold text-slate-800 dark:text-slate-100">{nombre}</p>
+                            <p className="text-sm text-slate-400">paciente</p>
+                        </div>
+                        <button onClick={cerrarSesion} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-red-500 transition px-2 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
                             <LogOut size={15} />
                             <span>Salir</span>
                         </button>
@@ -123,17 +122,16 @@ export default function DashboardPaciente() {
             </header>
 
             <main className="mx-auto max-w-7xl p-8">
-                <h2 className="mb-2 text-3xl font-bold text-slate-800">
+                <h2 className="mb-2 text-3xl font-bold text-slate-800 dark:text-slate-100">
                     Bienvenida, {nombre.split(" ")[0]}
                 </h2>
                 <p className="mb-8 text-slate-400">¿Qué necesitás hoy?</p>
 
-                {/* Alerta lista para retirar */}
                 {reservaListaParaRetirar && (
-                    <div className="mb-6 rounded-2xl border-l-4 border-green-500 bg-green-50 p-4 flex items-center justify-between">
+                    <div className="mb-6 rounded-2xl border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20 p-4 flex items-center justify-between">
                         <div>
-                            <p className="font-semibold text-green-700">Tu pedido está listo para retirar</p>
-                            <p className="text-sm text-green-600">{reservaListaParaRetirar.nombre} · {reservaListaParaRetirar.direccion}</p>
+                            <p className="font-semibold text-green-700 dark:text-green-400">Tu pedido está listo para retirar</p>
+                            <p className="text-sm text-green-600 dark:text-green-500">{reservaListaParaRetirar.nombre} · {reservaListaParaRetirar.direccion}</p>
                         </div>
                         <button onClick={() => navigate("/mis-reservas")} className="rounded-xl bg-green-600 px-4 py-2 text-sm text-white font-medium hover:bg-green-700 transition">
                             Ver reservas
@@ -141,88 +139,72 @@ export default function DashboardPaciente() {
                     </div>
                 )}
 
-                {/* Estadísticas */}
                 <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-                    <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-                        <p className="text-sm text-slate-500">Recetas activas</p>
-                        <p className="mt-2 text-4xl font-bold text-blue-600">{recetas.length}</p>
-                    </div>
-                    <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-                        <p className="text-sm text-slate-500">Medicamentos pendientes</p>
-                        <p className="mt-2 text-4xl font-bold text-blue-600">{medicamentosPendientes}</p>
-                        <p className="text-xs text-slate-400 mt-1">sin entregar</p>
-                    </div>
-                    <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-                        <p className="text-sm text-slate-500">Reservas activas</p>
-                        <p className="mt-2 text-4xl font-bold text-blue-600">{reservasActivas}</p>
-                        <p className="text-xs text-slate-400 mt-1">en proceso</p>
-                    </div>
-                    <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-                        <p className="text-sm text-slate-500">Farmacias cercanas</p>
-                        <p className="mt-2 text-4xl font-bold text-blue-600">
-                            {ubicacion ? farmaciasCercanas.length : "—"}
-                        </p>
-                        <p className="text-xs text-slate-400 mt-1">
-                            {ubicacionError ? "sin ubicación" : ubicacion ? "en radio de 5 km" : "obteniendo..."}
-                        </p>
-                    </div>
+                    {[
+                        { label: "Recetas activas", value: recetas.length, sub: null },
+                        { label: "Medicamentos pendientes", value: medicamentosPendientes, sub: "sin entregar" },
+                        { label: "Reservas activas", value: reservasActivas, sub: "en proceso" },
+                        { label: "Farmacias cercanas", value: ubicacion ? farmaciasCercanas.length : "—", sub: ubicacionError ? "sin ubicación" : ubicacion ? "en radio de 5 km" : "obteniendo..." },
+                    ].map(({ label, value, sub }) => (
+                        <div key={label} className="rounded-2xl bg-white dark:bg-slate-800 p-5 shadow-sm border border-slate-100 dark:border-slate-700">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
+                            <p className="mt-2 text-4xl font-bold text-blue-600">{value}</p>
+                            {sub && <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{sub}</p>}
+                        </div>
+                    ))}
                 </div>
 
-                {/* Acciones rápidas */}
-                <h2 className="mb-4 text-lg font-bold text-slate-800">Acciones rápidas</h2>
+                <h2 className="mb-4 text-lg font-bold text-slate-800 dark:text-slate-100">Acciones rápidas</h2>
                 <div className="mb-10 grid gap-4 md:grid-cols-3">
-                    <button onClick={() => navigate("/buscar-medicamentos")} className="rounded-2xl bg-white p-6 text-left border border-slate-100 shadow-sm hover:shadow-md transition">
-                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+                    <button onClick={() => navigate("/buscar-medicamentos")} className="rounded-2xl bg-white dark:bg-slate-800 p-6 text-left border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30">
                             <Search size={20} className="text-blue-600" />
                         </div>
-                        <h3 className="font-semibold text-slate-800">Buscar medicamento</h3>
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-100">Buscar medicamento</h3>
                         <p className="mt-1 text-sm text-slate-400">Encontrá disponibilidad en farmacias cercanas.</p>
                     </button>
-                    <button onClick={() => navigate("/mis-recetas")} className="rounded-2xl bg-white p-6 text-left border border-slate-100 shadow-sm hover:shadow-md transition">
-                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+                    <button onClick={() => navigate("/mis-recetas")} className="rounded-2xl bg-white dark:bg-slate-800 p-6 text-left border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30">
                             <FileText size={20} className="text-blue-600" />
                         </div>
-                        <h3 className="font-semibold text-slate-800">Mis recetas</h3>
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-100">Mis recetas</h3>
                         <p className="mt-1 text-sm text-slate-400">Consultá todas tus recetas digitales.</p>
                     </button>
-                    <button onClick={() => navigate("/mis-reservas")} className="rounded-2xl bg-white p-6 text-left border border-slate-100 shadow-sm hover:shadow-md transition">
-                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+                    <button onClick={() => navigate("/mis-reservas")} className="rounded-2xl bg-white dark:bg-slate-800 p-6 text-left border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30">
                             <PackageCheck size={20} className="text-blue-600" />
                         </div>
-                        <h3 className="font-semibold text-slate-800">Mis reservas</h3>
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-100">Mis reservas</h3>
                         <p className="mt-1 text-sm text-slate-400">Seguí el estado de tus pedidos.</p>
                         {reservasActivas > 0 && (
-                            <span className="mt-2 inline-block rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                            <span className="mt-2 inline-block rounded-full bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-400">
                                 {reservasActivas} activa{reservasActivas > 1 ? "s" : ""}
                             </span>
                         )}
                     </button>
                 </div>
 
-                {/* Mapa */}
-                <h2 className="mb-4 text-lg font-bold text-slate-800">Farmacias cercanas</h2>
+                <h2 className="mb-4 text-lg font-bold text-slate-800 dark:text-slate-100">Farmacias cercanas</h2>
                 {ubicacionError && <p className="mb-4 text-sm text-slate-400">No se pudo obtener tu ubicación. Mostrando todas las farmacias.</p>}
 
-                <div className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm" style={{ height: "400px" }}>
+                <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm" style={{ height: "400px" }}>
                     {!ubicacion && !ubicacionError ? (
-                        <div className="flex h-full items-center justify-center bg-slate-50">
+                        <div className="flex h-full items-center justify-center bg-slate-50 dark:bg-slate-800">
                             <p className="text-slate-400">Obteniendo tu ubicación...</p>
                         </div>
                     ) : (
                         <MapContainer center={[mapCenter.lat, mapCenter.lng]} zoom={13} style={{ height: "100%", width: "100%" }}>
                             <TileLayer
                                 attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-                                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                                url={dark
+                                    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                                    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"}
                             />
                             {ubicacion && (
                                 <Circle center={[ubicacion.lat, ubicacion.lng]} radius={5000}
                                     pathOptions={{ color: "#3b82f6", fillColor: "#3b82f6", fillOpacity: 0.08 }} />
                             )}
-                            {ubicacion && (
-                                <Marker position={[ubicacion.lat, ubicacion.lng]}>
-                                    <Popup>Tu ubicación</Popup>
-                                </Marker>
-                            )}
+                            {ubicacion && <Marker position={[ubicacion.lat, ubicacion.lng]}><Popup>Tu ubicación</Popup></Marker>}
                             {farmacias.map((f) => (
                                 <Marker key={f.id_farmacia} position={[f.latitud, f.longitud]}>
                                     <Popup>
@@ -235,16 +217,15 @@ export default function DashboardPaciente() {
                     )}
                 </div>
 
-                {/* Lista farmacias cercanas */}
                 {ubicacion && farmaciasCercanas.length > 0 && (
                     <div className="mt-4 grid gap-3 md:grid-cols-2">
                         {farmaciasCercanas.map((f) => (
-                            <div key={f.id_farmacia} className="flex items-center justify-between rounded-2xl bg-white p-4 border border-slate-100 shadow-sm">
+                            <div key={f.id_farmacia} className="flex items-center justify-between rounded-2xl bg-white dark:bg-slate-800 p-4 border border-slate-100 dark:border-slate-700 shadow-sm">
                                 <div>
-                                    <p className="font-semibold text-slate-800">{f.nombre}</p>
+                                    <p className="font-semibold text-slate-800 dark:text-slate-100">{f.nombre}</p>
                                     <p className="text-sm text-slate-400">{f.direccion}</p>
                                 </div>
-                                <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
+                                <span className="rounded-full bg-blue-100 dark:bg-blue-900/40 px-3 py-1 text-sm font-semibold text-blue-700 dark:text-blue-400">
                                     {f.distancia.toFixed(1)} km
                                 </span>
                             </div>

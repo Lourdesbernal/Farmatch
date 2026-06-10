@@ -12,8 +12,15 @@ import MisRecetas from "./pages/MisRecetas";
 import BuscarMedicamentos from "./pages/BuscarMedicamentos";
 import FarmaciasCercanas from "./pages/FarmaciasCercanas";
 import MisReservas from "./pages/MisReservas";
+import { useEffect } from "react";
+
 
 function App() {
+  useEffect(() => {
+    const theme = localStorage.getItem("theme");
+    if (theme === "dark") document.documentElement.classList.add("dark");
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
