@@ -17,9 +17,9 @@ const systemPrompt = (rol: Rol, contexto?: string): string => {
 };
 
 const mensajeInicial: Record<Rol, string> = {
-    paciente: "Hola! Soy tu asistente de salud de FARMATCH. Podés preguntarme para qué sirve un medicamento, cómo tomarlo, efectos secundarios o qué evitar mientras lo tomás. ¿En qué te puedo ayudar?",
-    medico: "Hola! Soy tu asistente clínico de FARMATCH. Podés consultarme sobre interacciones medicamentosas, dosis, contraindicaciones, equivalentes genéricos o guías clínicas. ¿En qué te puedo ayudar?",
-    farmacia: "Hola! Soy tu asistente farmacéutico de FARMATCH. Podés preguntarme sobre equivalentes genéricos y comerciales, conservación de medicamentos, presentaciones disponibles o dudas sobre dispensación. ¿En qué te puedo ayudar?",
+    paciente: "Hola! Soy FARMY, tu asistente de salud de FARMATCH. Podés preguntarme para qué sirve un medicamento, cómo tomarlo, efectos secundarios o qué evitar mientras lo tomás. ¿En qué te puedo ayudar?",
+    medico: "Hola! Soy FARMY,tu asistente clínico de FARMATCH. Podés consultarme sobre interacciones medicamentosas, dosis, contraindicaciones, equivalentes genéricos o guías clínicas. ¿En qué te puedo ayudar?",
+    farmacia: "Hola! Soy FARMY, tu asistente farmacéutico de FARMATCH. Podés preguntarme sobre equivalentes genéricos y comerciales, conservación de medicamentos, presentaciones disponibles o dudas sobre dispensación. ¿En qué te puedo ayudar?",
 };
 
 const placeholder: Record<Rol, string> = {
@@ -29,9 +29,9 @@ const placeholder: Record<Rol, string> = {
 };
 
 const titulo: Record<Rol, string> = {
-    paciente: "Asistente de salud",
-    medico: "Asistente clínico",
-    farmacia: "Asistente farmacéutico",
+    paciente: "FARMY",
+    medico: "FARMY",
+    farmacia: "FARMY",
 };
 
 const COHERE_API_KEY = import.meta.env.VITE_COHERE_KEY;
