@@ -137,7 +137,7 @@ export default function ChatIA({ rol, contexto }: Props) {
                     ${abierto ? "bg-slate-700" : "bg-blue-600 hover:bg-blue-700 hover:scale-110"}`}
                 aria-label="Abrir asistente IA"
             >
-                {abierto ? <X size={22} className="text-white" /> : <MessageCircle size={22} className="text-white" />}
+                {abierto ? <X size={22} className="text-white" /> : <FarmyIcon size={28} />}
             </button>
 
             {/* Ventana del chat */}
