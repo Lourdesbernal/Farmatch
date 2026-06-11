@@ -112,7 +112,14 @@ export default function DashboardMedico() {
         if (formItems.some((it) => it.cantidad < 1)) return showToast("La cantidad mínima es 1.", "err");
         setSubmitting(true);
         try {
-            const { data: receta, error: errReceta } = await supabase.from("recetas").insert({ id_paciente: formPacienteId, id_medico: medicoId, estado: "activa" }).select().single();
+            const { data: receta, error: errReceta } = await supabase
+                .from("recetas")
+                .insert({
+                    id_paciente: formPacienteId,
+                    id_medico: medicoId,
+                    estado: "activa",
+                    fecha_vencimiento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+                }).select().single();
             if (errReceta || !receta) throw errReceta;
             const { error: errItems } = await supabase.from("receta_items").insert(formItems.map((it) => ({ id_receta: receta.id_receta, id_medicamento: it.id_medicamento, cantidad: it.cantidad, indicaciones: it.indicaciones || null, entregado: false })));
             if (errItems) throw errItems;
