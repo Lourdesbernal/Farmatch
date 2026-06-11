@@ -93,7 +93,14 @@ export default function DashboardMedico() {
         if (!newNombre.trim() || !newApellido.trim() || !newDni.trim()) return showToast("Nombre, apellido y DNI son obligatorios.", "err");
         setSavingPaciente(true);
         try {
-            const { data, error } = await supabase.from("pacientes").insert({ nombre: newNombre.trim(), apellido: newApellido.trim(), dni: newDni.trim(), obra_social: newObraSocial.trim() || null, id_medico_cargo: medicoId }).select().single();
+            const { data, error } = await supabase.from("pacientes").insert({
+                nombre: newNombre.trim(),
+                apellido: newApellido.trim(),
+                dni: newDni.trim(),
+                email: `${newDni.trim()}@farmatch.temp`,
+                obra_social: newObraSocial.trim() || null,
+                id_medico_cargo: medicoId
+            }).select().single();
             if (error) throw error;
             showToast(`Paciente ${data.nombre} ${data.apellido} agregado.`, "ok");
             setShowModalPaciente(false); setNewNombre(""); setNewApellido(""); setNewDni(""); setNewObraSocial("");
